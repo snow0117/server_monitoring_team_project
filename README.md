@@ -56,16 +56,50 @@ server_monitoring_team_project/
 - 비밀번호, 토큰, Discord Webhook URL은 업로드하지 않는다.
 
 ## 7. 팀원 및 역할 분담
-
-|이름|담당 역할|
-|---|---|
-|손수진|-|
-|신해찬|-|
-|허재훈|-|
-|김하얀|-|
-
-
+ 
+| 이름 | 담당 역할 | 담당 기술 | 작업 폴더 | 브랜치 | PR |
+|---|---|---|---|---|---|
+| 신해찬 | 수집·협업 관리 | Node Exporter, Prometheus | `node-exporter/`, `prometheus/` | `feature/collect`, `feature/alert-connect` | #2, #5 |
+| 허재훈 | 시각화·저장소 개설 | Grafana | `grafana/` | `feature/init`, `feature/dashboard` | #1, #6 |
+| 김하얀 | 알림·Discord 개설 및 관리 | Alertmanager, Discord 웹후크 | `alertmanager/` | `feature/alert` | #4 |
+| 손수진 | 접속·통합·PPT | Nginx, 통합 설치 스크립트 | `nginx/`, `scripts/` | `feature/web` | #3 |
+ 
+- 역할별로 브랜치를 나눠 작업하고, 모든 변경은 Pull Request로 올려 팀원의 승인을 받은 뒤 `main`에 병합했다.
+- 소통은 Discord로 했고, 코드 리뷰는 GitHub Pull Request에서 했다.
+- PR #5(`feature/alert-connect`): 알림 규칙을 Prometheus에 연결하는 설정을 보완했고, 팀원 리뷰를 거쳐 merge했다.
 
 ## 8. 설치 및 실행 방법
-
-추후 작성 예정
+ 
+### 준비물
+ 
+- Ubuntu (VMware 가상 머신도 가능), 인터넷 연결, `sudo` 권한
+- 디스크 여유 공간 약 8GB, 메모리 4GB 이상 권장
+- Discord 웹후크 주소 (알림을 받으려는 경우에만 필요, 없어도 설치됨)
+### 설치
+ 
+```bash
+git clone https://github.com/snow0117/server_monitoring_team_project.git
+cd server_monitoring_team_project
+bash scripts/setup.sh
+```
+ 
+`scripts/setup.sh` 하나로 Prometheus, Node Exporter, Alertmanager, Grafana, Nginx를 설치하고 저장소의 설정 파일을 적용한 뒤 서비스를 시작한다. 중간에 Discord 웹후크 주소를 물어보는데, 지금 없으면 Enter로 건너뛰면 된다.
+ 
+### 확인
+ 
+Ubuntu 안의 브라우저에서 확인한다.
+ 
+- `http://localhost:9090/classic/targets`: `node`, `prometheus`가 UP
+- `http://localhost:3000`: Grafana 로그인 (처음에는 `admin` / `admin`)
+- `http://localhost`: Nginx를 거쳐 Grafana가 열림
+대시보드는 Grafana에서 **Dashboards → New → Import**로 `grafana/server-monitoring-dashboard.json`을 올리고, 데이터 소스를 `Prometheus`로 고르면 된다.
+ 
+### 알림 테스트
+ 
+```bash
+stress-ng --cpu 0 --timeout 300s
+```
+ 
+CPU 사용률이 80%를 넘는 상태가 1분 넘게 이어지면 `HighCpuUsage` 경고가 발생하고, 웹후크를 넣었다면 Discord로 알림이 온다.
+ 
+웹후크를 나중에 넣으려면 `/etc/prometheus/alertmanager.yml`의 `YOUR_WEBHOOK_URL`을 실제 주소로 바꾸고 `sudo systemctl restart prometheus-alertmanager`를 실행한다. 웹후크 주소는 비밀번호와 같아서 저장소나 Pull Request에는 올리지 않는다.
