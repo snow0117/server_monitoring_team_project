@@ -1,0 +1,33 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Secret files
+secrets/
+*.secret
+*.local.yml
+*.local.yaml
+
+# Monitoring data
+data/
+prometheus-data/
+grafana-data/
+alertmanager-data/
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.swp
+*.bak
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
