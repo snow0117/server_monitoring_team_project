@@ -1,0 +1,10 @@
+groups:
+  - name: node-alerts
+    rules:
+      - alert: HighCpuUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) > 80
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU 사용률이 80%를 넘었습니다 ({{ $labels.instance }})"
